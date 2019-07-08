@@ -1,0 +1,142 @@
+--- a/makeicecat	2019-05-13 20:55:02.000000000 +0200
++++ b/makeicecat	2019-05-13 20:54:38.007705184 +0200
+@@ -260,12 +260,9 @@
+ ###############################################################################
+ 
+ # Replace Firefox branding
+-find -type d | grep fennec | xargs prename s/fennec/icecatmobile/
+-find -type f | grep fennec | xargs prename s/fennec/icecatmobile/
+-find -type f | grep Fennec | xargs prename s/Fennec/IceCatMobile/
+-find -type d | grep firefox | xargs prename -f s/firefox/icecat/
+-find -type f | grep firefox | xargs prename -f s/firefox/icecat/
+-find -type f | grep Firefox | xargs prename -f s/Firefox/IceCat/
++find -type d | grep firefox | xargs perl-rename -f s/firefox/icecat/
++find -type f | grep firefox | xargs perl-rename -f s/firefox/icecat/
++find -type f | grep Firefox | xargs perl-rename -f s/Firefox/IceCat/
+ 
+ echo "Running batch rebranding"
+ SEDSCRIPT="
+@@ -285,11 +282,8 @@
+ 
+ s/Mozilla Firefox/GNU IceCat/g;
+ s/firefox/icecat/g;
+-s/fennec/icecatmobile/g;
+ s/Firefox/IceCat/g;
+-s/Fennec/IceCatMobile/g;
+ s/FIREFOX/ICECAT/g;
+-s/FENNEC/ICECATMOBILE/g;
+ s/ Mozilla / GNU /g;
+ 
+ s|PACKAGES/icecat|PACKAGES/firefox|g;
+@@ -327,7 +321,7 @@
+ 
+ sed 's/mozilla-bin/icecat-bin/' -i build/unix/run-mozilla.sh
+ 
+-find -type f | grep run-mozilla | xargs prename s/mozilla/icecat/
++find -type f | grep run-mozilla | xargs perl-rename s/mozilla/icecat/
+ 
+ # do not alter useragent/platform/oscpu/etc with fingerprinting countermeasure, it makes things worse
+ sed '/ShouldResistFingerprinting/,/}/s/^/\/\//' -i ./netwerk/protocol/http/nsHttpHandler.cpp
+@@ -374,7 +368,6 @@
+ MOZ_DATA_REPORTING=0
+ MOZ_SERVICES_SYNC=0
+ MOZ_DEVICES=0
+-MOZ_ANDROID_GOOGLE_PLAY_SERVICES=0
+ MOZ_ADDON_SIGNING=0
+ EOF
+ 
+@@ -445,87 +438,6 @@
+ cp $ff32 image/test/unit/image2jpg32x32-win.png
+ 
+ ###############################################################################
+-# Mobile
+-###############################################################################
+-
+-echo "-dontwarn android.support.**" >> mobile/android/config/proguard/proguard.cfg
+-echo "-dontwarn android.support.**" >> mobile/android/config/proguard/strip-libs.cfg
+-
+-cat << EOF >> mobile/android/confvars.sh
+-# IceCat settings
+-MOZ_APP_VENDOR=GNU
+-MOZ_APP_VERSION=$FFVERSION
+-MOZ_PAY=0
+-MOZ_SERVICES_HEALTHREPORT=0
+-MOZ_SERVICES_HEALTHREPORTER=0
+-MOZ_SERVICES_FXACCOUNTS=0
+-MOZ_SERVICES_METRICS=0
+-MOZ_DATA_REPORTING=0
+-MOZ_SERVICES_SYNC=0
+-MOZ_DEVICES=0
+-MOZ_ANDROID_GOOGLE_PLAY_SERVICES=0
+-MOZ_ADDON_SIGNING=0
+-EOF
+-
+-rm -R mobile/android/gradle/
+-sed -i '/gradle/d' mobile/android/base/Makefile.in
+-
+-cat $DATA/settings.js >> mobile/android/app/mobile.js
+-cat $DATA/settings-android.js >> mobile/android/app/mobile.js
+-
+-cat << EOF > mobile/locales/en-US/chrome/region.properties
+-browser.search.defaultenginename=DuckDuckGo
+-browser.search.order.1=DuckDuckGo
+-browser.search.order.2=Google
+-browser.search.order.3=Yahoo
+-EOF
+-
+-cp $DATA/preferences_vendor.xml ./mobile/android/app/src/main/res/xml/preferences_vendor.xml
+-
+-sed '/public static void checkAndNotifyPolicy/ s/{/{ if(true) return;/; /private static void notifyDataPolicy/ s/{/{ if(true) return;/ ' -i mobile/android/base/java/org/mozilla/gecko/DataReportingNotification.java
+-
+-cp -a $DATA/android-images/core/* mobile/android/themes/core/images/
+-cp -a $DATA/android-images/resources mobile/android/base
+-
+-sed '/aboutDetails/,/div/d; /privacyURL/d' mobile/android/chrome/content/about.xhtml -i
+-
+-sed '/SENDERID/d' -i mobile/android/app/mobile.js
+-
+-cat $DATA/mobile.dupes  >> mobile/android/installer/allowed-dupes.mn
+-
+-###############################################################################
+-# Macos packaging
+-###############################################################################
+-
+-cat << EOF > ./build/package/mac_osx/pkg-dmg
+-#!/bin/sh
+-set -e
+-export LC_ALL=C
+-
+-cd \$2
+-DMGFILE=\$4
+-
+-# We need group readability for some Macs to be able to handle /Applications
+-# installation. Still unclear exactly why this is -- it is not dependent on
+-# OSX version...
+-find . -executable -exec chmod 750 {} \;
+-find . ! -executable -exec chmod 640 {} \;
+-
+-find . -type f | sed -e 's/^\.\///' | sort | xargs -i echo "{}={}" > /tmp/filelist.txt
+-find . -type l | sed -e 's/^\.\///' | sort | xargs -i echo "{}={}" >> /tmp/filelist.txt
+-
+-mkisofs -D -V "\$6" -no-pad -R -apple -o /tmp/icecat-uncompressed.dmg -path-list /tmp/filelist.txt -graft-points -gid 20 -dir-mode 0750 -new-dir-mode 0750
+-
+-
+-dmg dmg /tmp/icecat-uncompressed.dmg \$4
+-rm /tmp/icecat-uncompressed.dmg
+-
+-find . -executable -exec chmod 755 {} \;
+-find . ! -executable -exec chmod 644 {} \;
+-find . -type d -exec chmod 755 {} \;
+-EOF
+-
+-###############################################################################
+ # Extensions
+ ###############################################################################
+ 
+@@ -590,6 +502,3 @@
+ # Fix CVE-2012-3386
+ /bin/sed 's/chmod a+w/chmod u+w/' -i ./js/src/ctypes/libffi/Makefile.in ./toolkit/crashreporter/google-breakpad/Makefile.in ./toolkit/crashreporter/google-breakpad/src/third_party/glog/Makefile.in || true
+ 
+-cd ..
+-echo Packaging tarball
+-tar cfj icecat-$ICECATVERSION.tar.bz2 $SOURCEDIR
