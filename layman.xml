@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repositories version="1.0">
+  <repo quality="experimental" status="unofficial">
+    <name>foxy</name>
+    <description lang="en">Foxy overlay></description>
+    <homepage>https://github.com/kitsunyan/foxy-overlay</homepage>
+    <owner type="person">
+      <name>kitsunyan</name>
+      <email>kitsunyan@airmail.cc</email>
+    </owner>
+    <source type="git">https://github.com/kitsunyan/foxy-overlay.git</source>
+    <source type="git">git://github.com/kitsunyan/foxy-overlay.git</source>
+    <feed>https://github.com/kitsunyan/foxy-overlay/commits/maint.atom</feed>
+  </repo>
+</repositories>
