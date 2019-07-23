@@ -15,53 +15,47 @@ HOMEPAGE="https://www.gnu.org/software/gnuzilla"
 KEYWORDS="amd64 arm64 x86"
 SLOT="0"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
-IUSE="dbus startup-notification gnu-extensions"
+IUSE="jack pulseaudio dbus startup-notification gnu-extensions"
 
 CDEPEND="
-	>=dev-libs/nss-3.43
-	>=dev-libs/nspr-4.21
+	>=app-text/hunspell-1.5.4:=
+	jack? ( virtual/jack )
+	pulseaudio? (
+		|| (
+			media-sound/pulseaudio
+			>=media-sound/apulse-0.1.9
+		)
+	)
+	>=dev-libs/nss-3.36.8
+	>=dev-libs/nspr-4.19
 	dev-libs/atk
 	dev-libs/expat
-	>=x11-libs/cairo-1.10[X]
 	>=x11-libs/gtk+-2.18:2
 	>=x11-libs/gtk+-3.4.0:3=[X]
-	x11-libs/gdk-pixbuf
-	>=x11-libs/pango-1.22.0
-	>=media-libs/libpng-1.6.35:0=[apng]
+	>=media-libs/libpng-1.6.34:0=[apng]
 	>=media-libs/mesa-10.2:*
-	media-libs/fontconfig
-	>=media-libs/freetype-2.4.10
-	kernel_linux? ( media-libs/alsa-lib )
+	kernel_linux? ( !pulseaudio? ( media-libs/alsa-lib ) )
 	virtual/freedesktop-icon-theme
-	dbus? ( >=sys-apps/dbus-0.60
-		>=dev-libs/dbus-glib-0.72 )
+	dbus? (
+		>=sys-apps/dbus-0.60
+		>=dev-libs/dbus-glib-0.72
+	)
 	startup-notification? ( >=x11-libs/startup-notification-0.8 )
 	>=x11-libs/pixman-0.19.2
-	>=dev-libs/glib-2.26:2
-	>=sys-libs/zlib-1.2.3
 	>=virtual/libffi-3.0.10:=
 	virtual/ffmpeg
-	x11-libs/libX11
-	x11-libs/libXcomposite
-	x11-libs/libXdamage
-	x11-libs/libXext
-	x11-libs/libXfixes
-	x11-libs/libXrender
 	x11-libs/libXt
-	>=media-libs/dav1d-0.2.0:=
-	>=media-libs/libaom-1.0.0:=
-	>=media-libs/harfbuzz-2.3.1:0= >=media-gfx/graphite2-1.3.13
-	>=dev-libs/icu-63.1:=
+	>=dev-libs/icu-60.2
 	>=media-libs/libjpeg-turbo-1.2.1
-	>=dev-db/sqlite-3.27.2:3[secure-delete]
-	>=media-libs/libwebp-1.0.2:0="
+	>=dev-libs/libevent-2.0:0=[threads]
+	>=dev-db/sqlite-3.21.1:3[secure-delete]
+	>=media-libs/libvpx-1.5.0:0=[postproc]
+	<media-libs/libvpx-1.8:0=[postproc]"
 
 DEPEND="${CDEPEND}
 	=www-client/icecat-sources-${PV}
 	app-arch/zip
 	app-arch/unzip
-	>=dev-util/cbindgen-0.8.2
-	>=net-libs/nodejs-8.11.0
 	>=sys-devel/binutils-2.30
 	sys-apps/findutils
 	|| (
@@ -78,12 +72,22 @@ DEPEND="${CDEPEND}
 			sys-devel/llvm:6
 		)
 	)
-	>=virtual/cargo-1.31.0
-	>=virtual/rust-1.31.0
-	amd64? ( >=dev-lang/yasm-1.1 virtual/opengl )
-	x86? ( >=dev-lang/yasm-1.1 virtual/opengl )"
+	virtual/cargo
+	virtual/rust
+	amd64? (
+		>=dev-lang/yasm-1.1
+		virtual/opengl
+	)
+	x86? (
+		>=dev-lang/yasm-1.1
+		virtual/opengl
+	)"
 
 RDEPEND="${CDEPEND}"
+
+pkg_setup() {
+	llvm_pkg_setup
+}
 
 src_unpack() {
 	cp -rp "/usr/src/${P}" . || die
@@ -101,42 +105,65 @@ src_prepare() {
 	patch -Np1 -i "${FILESDIR}/deny_missing_docs.patch" || die
 	patch -Np1 -i "${FILESDIR}/fix-addons.patch" || die
 
-	(echo 'ac_add_options --enable-application=browser'
-	echo 'ac_add_options --with-app-basename=icecat'
-	echo 'ac_add_options --with-app-name=icecat'
+	(mc() { echo "ac_add_options $1"; }
+
+	mc '--enable-application=browser'
+	mc '--with-app-basename=icecat'
+	mc '--with-app-name=icecat'
 	
-	echo 'ac_add_options --prefix=/usr'
-	echo "ac_add_options --libdir=/usr/`get_libdir`"
-	echo 'ac_add_options --enable-linker=gold'
-	echo 'ac_add_options --enable-hardening'
-	echo 'ac_add_options --enable-optimize'
-	echo 'ac_add_options --enable-rust-simd'
+	mc "--prefix=${EPREFIX}/usr"
+	mc "--libdir=${EPREFIX}/usr/$(get_libdir)"
+	mc '--enable-linker=gold'
+	mc '--enable-hardening'
+	mc '--enable-optimize'
+	mc '--enable-rust-simd'
+	mc '--without-ccache'
+	mc "--x-includes=${SYSROOT}${EPREFIX}/usr/include"
+	mc "--x-libraries=${SYSROOT}${EPREFIX}/usr/$(get_libdir)"
 
 	# Branding
-	echo 'ac_add_options --enable-official-branding'
-	echo 'ac_add_options --with-distribution-id=org.gnu'
+	mc '--enable-official-branding'
+	mc '--with-distribution-id=org.gnu'
 	
 	# System libraries
-	echo 'ac_add_options --with-system-zlib'
-	echo 'ac_add_options --with-system-bz2'
-	echo 'ac_add_options --with-system-icu'
-	echo 'ac_add_options --with-system-jpeg'
-	echo 'ac_add_options --with-system-nspr'
-	echo 'ac_add_options --with-system-nss'
-	echo 'ac_add_options --enable-system-sqlite'
-	echo 'ac_add_options --enable-system-ffi'
+	mc '--with-system-zlib'
+	mc '--with-system-bz2'
+	mc '--with-system-icu'
+	mc '--with-system-jpeg'
+	mc '--with-system-png'
+	mc '--with-system-nspr'
+	mc "--with-nspr-prefix=${SYSROOT}${EPREFIX}/usr"
+	mc '--with-system-nss'
+	mc "--with-nss-prefix=${SYSROOT}${EPREFIX}/usr"
+	mc '--with-system-libvpx'
+	mc "--with-system-libevent=${SYSROOT}${EPREFIX}/usr"
+	mc '--enable-system-hunspell'
+	mc '--enable-system-sqlite'
+	mc '--enable-system-ffi'
 	
-	# Features
-	echo 'ac_add_options --enable-alsa'
-	if use startup-notification; then
-		echo 'ac_add_options --enable-startup-notification'
+	if use jack; then
+		mc '--enable-jack'
+	else
+		mc '--disable-jack'
 	fi
-	echo 'ac_add_options --disable-crashreporter'
-	echo 'ac_add_options --disable-updater'
-	echo 'ac_add_options --disable-debug-symbols'
-	echo 'ac_add_options --disable-tests'
-	echo 'ac_add_options --disable-eme'
-	echo 'ac_add_options --disable-gconf'
+	if use pulseaudio; then
+		mc '--enable-pulseaudio'
+		mc '--disable-alsa'
+	else
+		mc '--disable-pulseaudio'
+		mc '--enable-alsa'
+	fi
+	if use startup-notification; then
+		mc '--enable-startup-notification'
+	else
+		mc '--disable-startup-notification'
+	fi
+	mc '--disable-crashreporter'
+	mc '--disable-updater'
+	mc '--disable-debug-symbols'
+	mc '--disable-tests'
+	mc '--disable-eme'
+	mc '--disable-gconf'
 
 	echo 'mk_add_options XARGS=/usr/bin/xargs') \
 	> .mozconfig
@@ -149,8 +176,7 @@ src_configure() {
 }
 
 src_compile() {
-	PATH="${FILESDIR}:${PATH}" ICECATDIR="/usr/`get_libdir`/${PN}" \
-	CC=clang CXX=clang++ AR=llvm-ar NM=llvm-nm RANLIB=llvm-ranlib \
+	PATH="${FILESDIR}:${PATH}" ICECATDIR="/usr/$(get_libdir)/${PN}" \
 	./mach build || die
 }
 
@@ -160,7 +186,7 @@ src_install() {
 	PATH="${FILESDIR}:${PATH}" DESTDIR="${D}" \
 	./mach install || die
 
-	local vendorjs="${D}/usr/`get_libdir`/${PN}/browser/defaults/preferences/vendor.js"
+	local vendorjs="${D}/usr/$(get_libdir)/${PN}/browser/defaults/preferences/vendor.js"
 	install -Dm644 /dev/stdin "$vendorjs" <<END
 // Use LANG environment variable to choose locale
 pref("intl.locale.requested", "");
@@ -174,9 +200,9 @@ END
 
 	if ! use gnu-extensions; then
 		for f in extensions/gnu/*; do
-			rm -rfv "${D}/usr/`get_libdir`/${PN}/browser/extensions/${f##*/}";
+			rm -rfv "${D}/usr/$(get_libdir)/${PN}/browser/extensions/${f##*/}";
 		done
-		rmdir -pv "${D}/usr/`get_libdir`/${PN}/browser/extensions"
+		rmdir -pv "${D}/usr/$(get_libdir)/${PN}/browser/extensions"
 	fi
 
 	install -m755 -d "${D}/usr/share/pixmaps"
