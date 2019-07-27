@@ -1,1 +1,2 @@
-/bin/true
+#!/bin/sh
+true
