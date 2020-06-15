@@ -2,7 +2,7 @@
 <repositories version="1.0">
   <repo quality="experimental" status="unofficial">
     <name>foxy</name>
-    <description lang="en">Foxy overlay></description>
+    <description lang="en">Foxy overlay</description>
     <homepage>https://github.com/kitsunyan/foxy-overlay</homepage>
     <owner type="person">
       <name>kitsunyan</name>

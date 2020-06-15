@@ -1,0 +1,38 @@
+--- a/makeicecat
++++ b/makeicecat
+@@ -43,11 +43,7 @@
+ 
+ rm mozilla-esr${FFMAJOR} $SOURCEDIR -rf
+ 
+-wget -N https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${FFVERSION}esr/source/firefox-${FFVERSION}esr.source.tar.xz
+-wget -N https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${FFVERSION}esr/source/firefox-${FFVERSION}esr.source.tar.xz.asc
+-gpg --recv-keys --keyserver keyserver.ubuntu.com 14F26682D0916CDD81E37B6D61B7B526D98F0353
+-gpg --verify firefox-${FFVERSION}esr.source.tar.xz.asc
+-echo -n 935105e1a8a97d64daffb372690e2b566b5f07641f01470929dbbc82d20d4407 firefox-${FFVERSION}esr.source.tar.xz |sha256sum -c -
++ln -s "$DISTDIR/firefox-${FFVERSION}esr.source.tar.xz"
+ 
+ echo Extracting Firefox tarball
+ tar -xf firefox-${FFVERSION}esr.source.tar.xz
+@@ -64,7 +60,6 @@
+ cd l10n
+ while read line;do
+     line=$(echo $line |cut -d' ' -f1)
+-    #[ $line = "es-ES" ] || continue # To speed up testing
+     [ $line = "en-US" ] && continue
+     hg clone https://hg.mozilla.org/l10n-central/$line
+     mkdir -p $line/browser/chrome/browser/preferences
+@@ -75,12 +70,8 @@
+ 
+ mv l10n $SOURCEDIR
+ 
+-hg clone http://hg.mozilla.org/l10n/compare-locales/
+-cd compare-locales/
+-hg checkout RELEASE_3_3_0
+-cd ..
+-rm compare-locales/.hg* compare-locales/.git* -rf
+-mv compare-locales $SOURCEDIR/l10n
++bsdtar -xf "$DISTDIR/mozilla-compare-locales-3.3.0.zip"
++mv compare-locales-RELEASE_3_3_0 $SOURCEDIR/l10n/compare-locales
+ 
+ if [ "$UNPACK" = 'only' ]; then exit 0; fi
+ 

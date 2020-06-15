@@ -1,27 +1,36 @@
 --- a/makeicecat
 +++ b/makeicecat
-@@ -29,9 +29,12 @@
-
+@@ -31,9 +31,12 @@
+ 
  DATA="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/data
-
--mkdir output
+ 
+-mkdir -p output
 +[ -d output ] || [ "$UNPACK" ] || export UNPACK=1
-+[ -z "$UNPACK" ] || mkdir output
++[ -z "$UNPACK" ] || mkdir -p output
  cd output
-
+ 
 +if [ "$UNPACK" ]; then
 +
  ###############################################################################
  # Retrieve FF source code
  ###############################################################################
-@@ -75,6 +78,10 @@
+@@ -55,6 +58,8 @@
+ # Retrieve l10n
+ ###############################################################################
+
++[ ! -f "$DATA/shipped-locales" ] ||
++cp "$DATA/shipped-locales" "$SOURCEDIR/browser/locales/shipped-locales"
+ mkdir l10n
+ cd l10n
+ while read line;do
+@@ -77,6 +82,10 @@
  rm compare-locales/.hg* compare-locales/.git* -rf
  mv compare-locales $SOURCEDIR/l10n
-
+ 
 +if [ "$UNPACK" = 'only' ]; then exit 0; fi
 +
 +fi
 +
  #######################################################
-
+ 
  cd $SOURCEDIR
