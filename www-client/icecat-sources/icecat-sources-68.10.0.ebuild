@@ -11,7 +11,7 @@ SLOT="${PVR}"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
 IUSE=""
 
-GNUZILLA_PV="d7acf32ad905a3382cb2353577a96d29aa58f589"
+GNUZILLA_PV="76dced64ce0e72fe3030dc2f7b22cda8e36b165e"
 SRC_URI="
 	https://git.savannah.gnu.org/cgit/gnuzilla.git/snapshot/gnuzilla-${GNUZILLA_PV}.tar.gz
 	https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${PV}esr/source/firefox-${PV}esr.source.tar.xz
@@ -34,9 +34,10 @@ src_unpack() {
 	"${FILESDIR}/makeicecat-stuff.patch" \
 	"${FILESDIR}/stages.patch" \
 	"${FILESDIR}/sandbox.patch" || die
-	sed -e "s/^FFMAJOR.*/FFMAJOR=${PV:0:2}/g" -i makeicecat &&
-	sed -e "s/^FFMINOR.*/FFMINOR=${PV:(-3):(-2)}/g" -i makeicecat &&
-	sed -e "s/^FFSUB.*/FFSUB=${PV:(5)}/g" -i makeicecat || die
+	local pv=(${PV//./ })
+	sed -e "s/^FFMAJOR.*/FFMAJOR=${pv[0]}/g" -i makeicecat &&
+	sed -e "s/^FFMINOR.*/FFMINOR=${pv[1]}/g" -i makeicecat &&
+	sed -e "s/^FFSUB.*/FFSUB=${pv[2]}/g" -i makeicecat || die
 
 	rm -rf output
 	echo 'en-US' > data/shipped-locales
