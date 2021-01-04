@@ -11,7 +11,7 @@ SLOT="${PVR}"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
 IUSE=""
 
-GNUZILLA_PV="ac907e0c0f5b8896da34d31594b168e60983bec8"
+GNUZILLA_PV="15a7c3d991a670b6489d4f432b52a188358f4ca5"
 SRC_URI="
 	https://git.savannah.gnu.org/cgit/gnuzilla.git/snapshot/gnuzilla-${GNUZILLA_PV}.tar.gz
 	https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${PV}esr/source/firefox-${PV}esr.source.tar.xz
@@ -30,6 +30,7 @@ src_unpack() {
 	mv "gnuzilla-${GNUZILLA_PV}" "${P}"
 	cd "${P}"
 
+	sed -e '/\.source\.tar\.xz \?| \?sha256sum -c/d' -i makeicecat || die
 	eapply \
 	"${FILESDIR}/makeicecat-stuff.patch" \
 	"${FILESDIR}/stages.patch" \

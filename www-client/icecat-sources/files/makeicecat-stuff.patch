@@ -1,6 +1,6 @@
 --- a/makeicecat
 +++ b/makeicecat
-@@ -237,8 +237,8 @@
+@@ -236,8 +236,8 @@
  
  # Custom legal about pages
  
@@ -11,7 +11,7 @@
  
  for STRING in rights-intro-point-2 rights-intro-point-3 rights-intro-point-4 rights-intro-point-5 rights-intro-point-6 rights-webservices rights-safebrowsing
  do
-@@ -274,8 +274,10 @@
+@@ -273,8 +273,10 @@
  ###############################################################################
  
  # Replace Firefox branding
@@ -24,7 +24,7 @@
  
  rm browser/components/newtab/data/content/assets/icecat-wordmark.svg
  cp $DATA/branding/icecat-wordmark.svg browser/components/newtab/data/content/assets/
-@@ -340,7 +342,7 @@
+@@ -339,7 +341,7 @@
  
  sed 's/mozilla-bin/icecat-bin/' -i build/unix/run-mozilla.sh
  

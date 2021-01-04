@@ -3,9 +3,9 @@
 
 EAPI=7
 
-PYTHON_COMPAT=(python3_{6,7,8})
+PYTHON_COMPAT=( python3_{7,8,9} )
 PYTHON_REQ_USE='ncurses,sqlite,ssl,threads(+)'
-LLVM_MAX_SLOT=10
+LLVM_MAX_SLOT=11
 
 inherit check-reqs llvm python-any-r1 desktop gnome2-utils xdg-utils
 
@@ -25,7 +25,7 @@ CDEPEND="
 			>=media-sound/apulse-0.1.9
 		)
 	)
-	>=dev-libs/nss-3.44.3
+	>=dev-libs/nss-3.44.4
 	>=dev-libs/nspr-4.21
 	dev-libs/atk
 	dev-libs/expat
@@ -43,8 +43,8 @@ CDEPEND="
 	)
 	startup-notification? ( >=x11-libs/startup-notification-0.8 )
 	>=x11-libs/pixman-0.19.2
-	>=virtual/libffi-3.0.10:=
-	virtual/ffmpeg
+	>=dev-libs/libffi-3.0.10:=
+	media-video/ffmpeg
 	x11-libs/libXt
 	>=media-libs/dav1d-0.3.0:=
 	>=media-libs/libaom-1.0.0:=
@@ -54,7 +54,7 @@ CDEPEND="
 	>=media-libs/libjpeg-turbo-1.2.1
 	>=dev-libs/libevent-2.0:0=[threads]
 	>=dev-db/sqlite-3.28.0:3[secure-delete]
-	=media-libs/libvpx-1.7*:0=[postproc]"
+	>=media-libs/libvpx-1.8:0=[postproc]"
 
 DEPEND="${CDEPEND}
 	=www-client/icecat-sources-${PV}
@@ -66,7 +66,13 @@ DEPEND="${CDEPEND}
 	>=net-libs/nodejs-8.11.0
 	>=sys-devel/binutils-2.30
 	sys-apps/findutils
+	virtual/pkgconfig
+	>=virtual/rust-1.34
 	|| (
+		(
+			sys-devel/clang:11
+			sys-devel/llvm:11
+		)
 		(
 			sys-devel/clang:10
 			sys-devel/llvm:10
@@ -75,21 +81,8 @@ DEPEND="${CDEPEND}
 			sys-devel/clang:9
 			sys-devel/llvm:9
 		)
-		(
-			sys-devel/clang:8
-			sys-devel/llvm:8
-		)
-		(
-			sys-devel/clang:7
-			sys-devel/llvm:7
-		)
-		(
-			sys-devel/clang:6
-			sys-devel/llvm:6
-		)
 	)
 	pulseaudio? ( media-sound/pulseaudio )
-	>=virtual/rust-1.34
 	amd64? (
 		>=dev-lang/yasm-1.1
 		virtual/opengl
@@ -136,7 +129,9 @@ src_prepare() {
 	eapply \
 	"${FILESDIR}/2000_system_harfbuzz_support.patch" \
 	"${FILESDIR}/2001_system_graphite2_support.patch" \
-	"${FILESDIR}/7002_system_av1_support.patch" || die
+	"${FILESDIR}/7002_system_av1_support.patch" \
+	"${FILESDIR}/7003_system_libvpx.patch" \
+	"${FILESDIR}/rust-lto.patch" || die
 
 	eapply_user
 }
