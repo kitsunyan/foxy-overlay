@@ -24,14 +24,14 @@
  
  mv l10n $SOURCEDIR
  
--hg clone http://hg.mozilla.org/l10n/compare-locales/
+-hg clone https://hg.mozilla.org/l10n/compare-locales/
 -cd compare-locales/
--hg checkout RELEASE_3_3_0
+-hg checkout RELEASE_8_0_0
 -cd ..
 -rm compare-locales/.hg* compare-locales/.git* -rf
 -mv compare-locales $SOURCEDIR/l10n
-+bsdtar -xf "$DISTDIR/mozilla-compare-locales-3.3.0.zip"
-+mv compare-locales-RELEASE_3_3_0 $SOURCEDIR/l10n/compare-locales
++bsdtar -xf "$DISTDIR/mozilla-compare-locales-8.0.0.zip"
++mv compare-locales-RELEASE_8_0_0 $SOURCEDIR/l10n/compare-locales
  
  if [ "$UNPACK" = 'only' ]; then exit 0; fi
  

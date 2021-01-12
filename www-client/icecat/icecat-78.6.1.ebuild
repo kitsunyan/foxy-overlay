@@ -3,11 +3,20 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{7,8,9} )
-PYTHON_REQ_USE='ncurses,sqlite,ssl,threads(+)'
+FIREFOX_PATCHSET="firefox-78esr-patches-07.tar.xz"
+
 LLVM_MAX_SLOT=11
 
-inherit check-reqs llvm python-any-r1 desktop gnome2-utils xdg-utils
+PYTHON_COMPAT=( python3_{7,8,9} )
+PYTHON_REQ_USE="ncurses,sqlite,ssl"
+
+inherit check-reqs llvm python-any-r1 desktop gnome2-utils xdg
+
+PATCH_URIS=(
+	https://dev.gentoo.org/~{axs,polynomial-c,whissi}/mozilla/patchsets/${FIREFOX_PATCHSET}
+)
+
+SRC_URI="${PATCH_URIS[@]}"
 
 DESCRIPTION="GNU IceCat Web Browser"
 HOMEPAGE="https://www.gnu.org/software/gnuzilla"
@@ -15,59 +24,17 @@ HOMEPAGE="https://www.gnu.org/software/gnuzilla"
 KEYWORDS="amd64 arm64 x86"
 SLOT="0"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
-IUSE="jack pulseaudio dbus startup-notification gnu-extensions"
+IUSE="jack pulseaudio screencast dbus wayland gnu-extensions"
 
-CDEPEND="
-	jack? ( virtual/jack )
-	pulseaudio? (
-		|| (
-			media-sound/pulseaudio
-			>=media-sound/apulse-0.1.9
-		)
-	)
-	>=dev-libs/nss-3.44.4
-	>=dev-libs/nspr-4.21
-	dev-libs/atk
-	dev-libs/expat
-	>=x11-libs/gtk+-2.18:2
-	>=x11-libs/gtk+-3.4.0:3=[X]
-	>=media-libs/libpng-1.6.35:0=[apng]
-	>=media-libs/mesa-10.2:*
-	media-libs/fontconfig
-	>=media-libs/freetype-2.4.10
-	kernel_linux? ( !pulseaudio? ( media-libs/alsa-lib ) )
-	virtual/freedesktop-icon-theme
-	dbus? (
-		>=sys-apps/dbus-0.60
-		>=dev-libs/dbus-glib-0.72
-	)
-	startup-notification? ( >=x11-libs/startup-notification-0.8 )
-	>=x11-libs/pixman-0.19.2
-	>=dev-libs/libffi-3.0.10:=
-	media-video/ffmpeg
-	x11-libs/libXt
-	>=media-libs/dav1d-0.3.0:=
-	>=media-libs/libaom-1.0.0:=
-	>=media-libs/harfbuzz-2.4.0:0=
-	>=media-gfx/graphite2-1.3.13
-	>=dev-libs/icu-63.1
-	>=media-libs/libjpeg-turbo-1.2.1
-	>=dev-libs/libevent-2.0:0=[threads]
-	>=dev-db/sqlite-3.28.0:3[secure-delete]
-	>=media-libs/libvpx-1.8:0=[postproc]"
+REQUIRED_USE="screencast? ( wayland )"
 
-DEPEND="${CDEPEND}
-	=www-client/icecat-sources-${PV}
-	dev-lang/python:2.7[ncurses,sqlite,ssl,threads(+)]
-	${PYTHON_DEPS}
-	app-arch/zip
+BDEPEND="${PYTHON_DEPS}
 	app-arch/unzip
-	>=dev-util/cbindgen-0.8.7
-	>=net-libs/nodejs-8.11.0
-	>=sys-devel/binutils-2.30
-	sys-apps/findutils
+	app-arch/zip
+	>=dev-util/cbindgen-0.14.3
+	>=net-libs/nodejs-10.21.0
 	virtual/pkgconfig
-	>=virtual/rust-1.34
+	>=virtual/rust-1.41.0
 	|| (
 		(
 			sys-devel/clang:11
@@ -82,58 +49,101 @@ DEPEND="${CDEPEND}
 			sys-devel/llvm:9
 		)
 	)
-	pulseaudio? ( media-sound/pulseaudio )
-	amd64? (
-		>=dev-lang/yasm-1.1
-		virtual/opengl
+	amd64? ( >=dev-lang/yasm-1.1 )
+	x86? ( >=dev-lang/yasm-1.1 )"
+
+CDEPEND="
+	>=dev-libs/nss-3.53.1
+	>=dev-libs/nspr-4.25
+	dev-libs/atk
+	dev-libs/expat
+	>=x11-libs/gtk+-2.18:2
+	>=x11-libs/gtk+-3.4.0:3=[X]
+	>=media-libs/libpng-1.6.35:0=[apng]
+	>=media-libs/mesa-10.2:*
+	media-libs/fontconfig
+	>=media-libs/freetype-2.4.10
+	kernel_linux? ( !pulseaudio? ( media-libs/alsa-lib ) )
+	virtual/freedesktop-icon-theme
+	>=x11-libs/pixman-0.19.2
+	>=dev-libs/libffi-3.0.10:=
+	media-video/ffmpeg
+	x11-libs/libXt
+	dbus? (
+		sys-apps/dbus
+		dev-libs/dbus-glib
 	)
-	x86? (
-		>=dev-lang/yasm-1.1
-		virtual/opengl
+	screencast? ( media-video/pipewire:0/0.3 )
+	>=media-libs/dav1d-0.3.0:=
+	>=media-libs/libaom-1.0.0:=
+	>=media-libs/harfbuzz-2.6.8:0=
+	>=media-gfx/graphite2-1.3.13
+	>=dev-libs/icu-67.1
+	>=media-libs/libjpeg-turbo-1.2.1
+	>=dev-libs/libevent-2.0:0=[threads]
+	>=media-libs/libvpx-1.8.2:0=[postproc]
+	>=media-libs/libwebp-1.1.0:0=
+	jack? ( virtual/jack )"
+
+RDEPEND="${CDEPEND}
+	pulseaudio? (
+		|| (
+			media-sound/pulseaudio
+			>=media-sound/apulse-0.1.12-r4
+		)
 	)"
 
-RDEPEND="${CDEPEND}"
+DEPEND="${CDEPEND}
+	=www-client/icecat-sources-${PV}
+	pulseaudio? (
+		|| (
+			media-sound/pulseaudio
+			>=media-sound/apulse-0.1.12-r4[sdk]
+		)
+	)
+	wayland? ( >=x11-libs/gtk+-3.11:3[wayland] )
+	amd64? ( virtual/opengl )
+	x86? ( virtual/opengl )"
+
+moz_clear_vendor_checksums() {
+	einfo "Clearing cargo checksums for ${1} ..."
+	sed -i "${S}"/third_party/rust/${1}/.cargo-checksum.json \
+	-e 's/\("files":{\)[^}]*/\1/' || die
+}
 
 pkg_pretend() {
-	CHECKREQS_DISK_BUILD='4G'
+	CHECKREQS_DISK_BUILD='6400M'
 	check-reqs_pkg_pretend
 }
 
 pkg_setup() {
-	CHECKREQS_DISK_BUILD='4G'
+	CHECKREQS_DISK_BUILD='6400M'
 	check-reqs_pkg_setup
 
 	llvm_pkg_setup
 
 	python-any-r1_pkg_setup
-	# workaround to set python3 into PYTHON3 until mozilla doesn't need py2
-	if [[ "${PYTHON_COMPAT[@]}" != "${PYTHON_COMPAT[@]#python3*}" ]]; then
-		export PYTHON3=${PYTHON}
-		python_export python2_7 PYTHON EPYTHON
-	fi
+
+	# Ensure we use C locale when building, bug #746215
+	export LC_ALL=C
 }
 
 src_unpack() {
-	tar -xf "/usr/src/${P}.tar.bz2" || die
+	default
+	tar -xf "/usr/src/${P}.tar.gz" || die
 }
 
 src_prepare() {
-	sed -i config/baseconfig.mk \
-	-e 's;$(libdir)/$(MOZ_APP_NAME)-$(MOZ_APP_VERSION);$(libdir)/$(MOZ_APP_NAME);g'
-	sed -i config/baseconfig.mk \
-	-e 's;$(libdir)/$(MOZ_APP_NAME)-devel-$(MOZ_APP_VERSION);$(libdir)/$(MOZ_APP_NAME)-devel;g'
-
-	# recreate python environment
-	rm -rf obj-*
-
-	eapply \
-	"${FILESDIR}/2000_system_harfbuzz_support.patch" \
-	"${FILESDIR}/2001_system_graphite2_support.patch" \
-	"${FILESDIR}/7002_system_av1_support.patch" \
-	"${FILESDIR}/7003_system_libvpx.patch" \
-	"${FILESDIR}/rust-lto.patch" || die
-
+	eapply "${WORKDIR}/firefox-patches"
 	eapply_user
+
+	einfo "Removing pre-built binaries ..."
+	find "${S}"/third_party -type f \( -name '*.so' -o -name '*.o' \) -print -delete || die
+
+	# Clearing checksums where we have applied patches
+	moz_clear_vendor_checksums target-lexicon-0.9.0
+
+	xdg_src_prepare
 }
 
 src_configure() {
@@ -142,26 +152,28 @@ src_configure() {
 	mc '--enable-application=browser'
 	mc '--with-app-basename=icecat'
 	mc '--with-app-name=icecat'
+	mc '--disable-crashreporter'
+	mc '--disable-updater'
 	
 	mc "--prefix=${EPREFIX}/usr"
 	mc "--libdir=${EPREFIX}/usr/$(get_libdir)"
 	mc "CC=${CHOST}-gcc"
 	mc "CXX=${CHOST}-g++"
+	mc "--with-libclang-path=$(llvm-config --libdir)"
 	mc '--enable-linker=gold'
 	mc '--enable-hardening'
 	mc '--enable-optimize'
 	mc '--enable-rust-simd'
-	mc '--without-ccache'
 	mc "--x-includes=${SYSROOT}${EPREFIX}/usr/include"
 	mc "--x-libraries=${SYSROOT}${EPREFIX}/usr/$(get_libdir)"
 
 	# Branding
 	mc '--enable-official-branding'
 	mc '--with-distribution-id=org.gnu'
+	mc '--with-unsigned-addon-scopes=app,system'
 	
 	# System libraries
 	mc '--with-system-zlib'
-	mc '--with-system-bz2'
 	mc '--with-system-av1'
 	mc '--with-system-icu'
 	mc '--with-system-harfbuzz'
@@ -169,13 +181,12 @@ src_configure() {
 	mc '--with-system-jpeg'
 	mc '--with-system-png'
 	mc '--with-system-nspr'
-	mc "--with-nspr-prefix=${SYSROOT}${EPREFIX}/usr"
 	mc '--with-system-nss'
-	mc "--with-nss-prefix=${SYSROOT}${EPREFIX}/usr"
 	mc '--with-system-libvpx'
 	mc "--with-system-libevent=${SYSROOT}${EPREFIX}/usr"
-	mc '--enable-system-sqlite'
+	mc '--with-system-webp'
 	mc '--enable-system-ffi'
+	mc '--enable-system-pixman'
 	
 	if use jack; then
 		mc '--enable-jack'
@@ -189,19 +200,30 @@ src_configure() {
 		mc '--disable-pulseaudio'
 		mc '--enable-alsa'
 	fi
-	if use startup-notification; then
-		mc '--enable-startup-notification'
+	if use screencast; then
+		mc '--enable-pipewire'
 	else
-		mc '--disable-startup-notification'
+		mc '--disable-pipewire'
 	fi
-	mc '--disable-crashreporter'
-	mc '--disable-updater'
+	if use dbus; then
+		mc '--enable-dbus'
+	else
+		mc '--disable-dbus'
+	fi
+	if use wayland; then
+		mc '--enable-default-toolkit=cairo-gtk3-wayland'
+	else
+		mc '--enable-default-toolkit=cairo-gtk3'
+	fi
+
+	mc '--disable-cargo-incremental'
+	mc '--disable-install-strip'
+	mc '--disable-strip'
 	mc '--disable-debug-symbols'
 	mc '--disable-tests'
 	mc '--disable-eme'
-	mc '--disable-gconf'
 
-	echo 'mk_add_options XARGS=/usr/bin/xargs') \
+	echo "mk_add_options XARGS=${EPREFIX}/usr/bin/xargs") \
 	> .mozconfig
 	./mach configure || die
 }
@@ -252,18 +274,12 @@ END
 	done
 
 	newmenu "${FILESDIR}/${PN}.desktop" "${PN}.desktop"
-	if use startup-notification; then
-		sed -e 's/StartupNotify=false/StartupNotify=true/' \
-		-i "${D}/usr/share/applications/${PN}.desktop"
-	fi
+}
+
+pkg_preinst() {
+	xdg_pkg_preinst
 }
 
 pkg_postinst() {
-	xdg_icon_cache_update
-	xdg_desktop_database_update
-}
-
-pkg_postrm() {
-	xdg_icon_cache_update
-	xdg_desktop_database_update
+	xdg_pkg_postinst
 }

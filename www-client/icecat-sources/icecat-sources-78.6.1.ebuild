@@ -11,14 +11,13 @@ SLOT="${PVR}"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
 IUSE=""
 
-GNUZILLA_PV="15a7c3d991a670b6489d4f432b52a188358f4ca5"
+GNUZILLA_PV="10ca84bd9d255caeed506ef36bd3dbe2ad6375ab"
 SRC_URI="
 	https://git.savannah.gnu.org/cgit/gnuzilla.git/snapshot/gnuzilla-${GNUZILLA_PV}.tar.gz
 	https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${PV}esr/source/firefox-${PV}esr.source.tar.xz
-	https://hg.mozilla.org/l10n/compare-locales/archive/RELEASE_3_3_0.zip -> mozilla-compare-locales-3.3.0.zip"
+	https://hg.mozilla.org/l10n/compare-locales/archive/RELEASE_8_0_0.zip -> mozilla-compare-locales-8.0.0.zip"
 
 DEPEND="
-	dev-perl/rename
 	app-arch/libarchive"
 RDEPEND=""
 
@@ -32,17 +31,25 @@ src_unpack() {
 
 	sed -e '/\.source\.tar\.xz \?| \?sha256sum -c/d' -i makeicecat || die
 	eapply \
-	"${FILESDIR}/makeicecat-stuff.patch" \
 	"${FILESDIR}/stages.patch" \
 	"${FILESDIR}/sandbox.patch" || die
 	local pv=(${PV//./ })
 	sed -e "s/^FFMAJOR.*/FFMAJOR=${pv[0]}/g" -i makeicecat &&
 	sed -e "s/^FFMINOR.*/FFMINOR=${pv[1]}/g" -i makeicecat &&
-	sed -e "s/^FFSUB.*/FFSUB=${pv[2]}/g" -i makeicecat || die
+	sed -e "s/^FFSUB.*/FFSUB=${pv[2]}/g" -i makeicecat &&
+	sed -e 's/\(\bfind l10n .*\)/\1 || true/' -i makeicecat || die
+	sed -e 's/cfj\( .*\).bz2/cfz\1.gz/' -i makeicecat || die
+
+	# parallel find+sed
+	local nproc="`grep -Po '(?<=-j)\d+' <<< "$MAKEOPTS"`"
+	[ -z "$nproc" ] && nproc='1'
+	local fcmd='\(\bfind .*\) -execdir \(/bin/sed .*\) '"';'"
+	local frepl='\1 -print0 | xargs -0 -P '"$nproc"' -i \2'
+	sed -e "s,$fcmd,$frepl," -i makeicecat || die
 
 	rm -rf output
 	echo 'en-US' > data/shipped-locales
-	UNPACK=only bash makeicecat || die
+	PATH="${FILESDIR}:${PATH}" UNPACK=only bash makeicecat || die
 }
 
 src_prepare() {
@@ -50,10 +57,10 @@ src_prepare() {
 	for f in data/files-to-append/l10n/*; do
 	  [ -e "output/icecat-${PV}/l10n/${f##*/}" ] || rm -rf "$f"
 	done
-	UNPACK= bash makeicecat || die
+	PATH="${FILESDIR}:${PATH}" UNPACK= bash makeicecat || die
 }
 
 src_install() {
-	install -Dm644 "output/icecat-${PV}-gnu"*".tar.bz2" \
-	"${D}/usr/src/icecat-${PV}.tar.bz2" || die
+	install -Dm644 "output/icecat-${PV}-gnu"*".tar.gz" \
+	"${D}/usr/src/icecat-${PV}.tar.gz" || die
 }

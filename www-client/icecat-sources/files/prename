@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+[ "$1" = '--nofullpath' ]
+shift
+expressions=()
+while [ "$#" -gt 0 ]; do
+  [ "$1" = '-E' ]
+  shift
+  expressions+=("$1")
+  shift
+done
+xargs -n 1 |
+xargs -i bash -c '
+oldpath="$1"
+oldname="${oldpath##*/}"
+newname="$oldname"
+shift
+for expression in "$@"; do
+  newname="`perl -pe "$expression" <<< "$newname"`"
+done
+[ "$newname" = "$oldname" ] || {
+  dir="${oldpath%/*}"
+  [ "$dir" = "$oldpath" ] && newpath="$newname" || newpath="$dir/$newname"
+  mv -v "$oldpath" "$newpath"
+}
+' bash '{}' "${expressions[@]}"
