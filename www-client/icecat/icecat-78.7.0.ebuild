@@ -10,7 +10,9 @@ LLVM_MAX_SLOT=11
 PYTHON_COMPAT=( python3_{7,8,9} )
 PYTHON_REQ_USE="ncurses,sqlite,ssl"
 
-inherit check-reqs llvm python-any-r1 desktop gnome2-utils xdg
+WANT_AUTOCONF="2.1"
+
+inherit autotools check-reqs llvm python-any-r1 desktop gnome2-utils xdg
 
 PATCH_URIS=(
 	https://dev.gentoo.org/~{axs,polynomial-c,whissi}/mozilla/patchsets/${FIREFOX_PATCHSET}

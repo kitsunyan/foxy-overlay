@@ -11,7 +11,7 @@ SLOT="${PVR}"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
 IUSE=""
 
-GNUZILLA_PV="10ca84bd9d255caeed506ef36bd3dbe2ad6375ab"
+GNUZILLA_PV="abfe5eebaca3c2787f1a9505669393674493c177"
 SRC_URI="
 	https://git.savannah.gnu.org/cgit/gnuzilla.git/snapshot/gnuzilla-${GNUZILLA_PV}.tar.gz
 	https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${PV}esr/source/firefox-${PV}esr.source.tar.xz
