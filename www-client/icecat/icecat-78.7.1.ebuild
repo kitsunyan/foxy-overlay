@@ -3,7 +3,7 @@
 
 EAPI=7
 
-FIREFOX_PATCHSET="firefox-78esr-patches-07.tar.xz"
+FIREFOX_PATCHSET="firefox-78esr-patches-09.tar.xz"
 
 LLVM_MAX_SLOT=11
 
@@ -23,7 +23,7 @@ SRC_URI="${PATCH_URIS[@]}"
 DESCRIPTION="GNU IceCat Web Browser"
 HOMEPAGE="https://www.gnu.org/software/gnuzilla"
 
-KEYWORDS="amd64 arm64 x86"
+KEYWORDS="amd64 ~arm64 ~x86"
 SLOT="0"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
 IUSE="jack pulseaudio screencast dbus wayland gnu-extensions"

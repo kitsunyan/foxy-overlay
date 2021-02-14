@@ -21,6 +21,6 @@ done
 [ "$newname" = "$oldname" ] || {
   dir="${oldpath%/*}"
   [ "$dir" = "$oldpath" ] && newpath="$newname" || newpath="$dir/$newname"
-  mv -v "$oldpath" "$newpath"
+  mv "$oldpath" "$newpath"
 }
 ' bash '{}' "${expressions[@]}"

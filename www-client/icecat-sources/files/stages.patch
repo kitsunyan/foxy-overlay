@@ -1,36 +1,33 @@
 --- a/makeicecat
 +++ b/makeicecat
-@@ -31,9 +31,12 @@
+@@ -219,6 +219,8 @@
+ fetch_l10n()
+ {
+     cd l10n
++    [ ! -f "${DATADIR}/shipped-locales" ] ||
++    cp "${DATADIR}/shipped-locales" ../${SOURCEDIR}/browser/locales/shipped-locales
  
- DATA="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/data
- 
--mkdir -p output
-+[ -d output ] || [ "$UNPACK" ] || export UNPACK=1
-+[ -z "$UNPACK" ] || mkdir -p output
- cd output
- 
-+if [ "$UNPACK" ]; then
-+
- ###############################################################################
- # Retrieve FF source code
- ###############################################################################
-@@ -54,6 +57,8 @@
- # Retrieve l10n
- ###############################################################################
-
-+[ ! -f "$DATA/shipped-locales" ] ||
-+cp "$DATA/shipped-locales" "$SOURCEDIR/browser/locales/shipped-locales"
- mkdir l10n
- cd l10n
- while read line;do
-@@ -76,6 +81,10 @@
- rm compare-locales/.hg* compare-locales/.git* -rf
- mv compare-locales $SOURCEDIR/l10n
- 
-+if [ "$UNPACK" = 'only' ]; then exit 0; fi
-+
-+fi
-+
- #######################################################
- 
- cd $SOURCEDIR
+     while read lang; do
+         # download only one language-pack in devel mode
+@@ -244,5 +246,3 @@
+-        hg clone ${L10N_CMP_URL}/
++        bsdtar -xf "${DISTDIR}/mozilla-compare-locales-8.0.0.zip"
++        mv compare-locales-${L10N_CMP_REV} compare-locales
+     fi
+-    cd compare-locales/
+-    hg checkout ${L10N_CMP_REV}
+-    cd ..
+@@ -725,6 +725,10 @@
+-validate_env || exit 1
++[ -z "${UNPACK}" ] ||
+ prepare_env
+-fetch_source
+-verify_sources
++ln -sf "${DISTDIR}/${SOURCEBALL}" output
++cd output
++[ -z "${UNPACK}" ] ||
+ extract_sources
++[ -z "${UNPACK}" ] ||
+ fetch_l10n
++[ -z "${UNPACK}" ] ||
++exit 0
