@@ -1,4 +1,4 @@
-# Copyright 2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -6,9 +6,9 @@ EAPI=7
 DESCRIPTION="GNU IceCat Web Browser Sources"
 HOMEPAGE="https://www.gnu.org/software/gnuzilla"
 
-KEYWORDS="*"
-SLOT="${PVR}"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
+SLOT="${PV}"
+KEYWORDS="amd64 arm64 x86"
 IUSE=""
 
 GNUZILLA_PV="abfe5eebaca3c2787f1a9505669393674493c177"
@@ -29,23 +29,23 @@ src_unpack() {
 	mv "gnuzilla-${GNUZILLA_PV}" "${P}"
 	cd "${P}"
 
-	sed -e '/\.source\.tar\.xz \?| \?sha256sum -c/d' -i makeicecat || die
-	eapply \
+	'sed' -e '/\.source\.tar\.xz \?| \?sha256sum -c/d' -i makeicecat || die
+	'eapply' \
 	"${FILESDIR}/stages.patch" \
 	"${FILESDIR}/sandbox.patch" || die
 	local pv=(${PV//./ })
-	sed -e "s/^FFMAJOR.*/FFMAJOR=${pv[0]}/g" -i makeicecat &&
-	sed -e "s/^FFMINOR.*/FFMINOR=${pv[1]}/g" -i makeicecat &&
-	sed -e "s/^FFSUB.*/FFSUB=${pv[2]}/g" -i makeicecat &&
-	sed -e 's/\(\bfind l10n .*\)/\1 || true/' -i makeicecat || die
-	sed -e 's/cfj\( .*\).bz2/cfz\1.gz/' -i makeicecat || die
+	'sed' -e "s/^FFMAJOR.*/FFMAJOR=${pv[0]}/g" -i makeicecat &&
+	'sed' -e "s/^FFMINOR.*/FFMINOR=${pv[1]}/g" -i makeicecat &&
+	'sed' -e "s/^FFSUB.*/FFSUB=${pv[2]}/g" -i makeicecat &&
+	'sed' -e 's/\(\bfind l10n .*\)/\1 || true/' -i makeicecat || die
+	'sed' -e 's/cfj\( .*\).bz2/cfz\1.gz/' -i makeicecat || die
 
 	# parallel find+sed
 	local nproc="`grep -Po '(?<=-j)\d+' <<< "$MAKEOPTS"`"
 	[ -z "$nproc" ] && nproc='1'
 	local fcmd='\(\bfind .*\) -execdir \(/bin/sed .*\) '"';'"
 	local frepl='\1 -print0 | xargs -0 -P '"$nproc"' -i \2'
-	sed -e "s,$fcmd,$frepl," -i makeicecat || die
+	'sed' -e "s,$fcmd,$frepl," -i makeicecat || die
 
 	rm -rf output
 	echo 'en-US' > data/shipped-locales

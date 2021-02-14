@@ -1,1 +1,12 @@
-../../metadata.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <name>kitsunyan</name>
+    <email>kitsunyan@airmail.cc</email>
+  </maintainer>
+  <use>
+    <flag name="gnu-extensions">Enable GNU extensions</flag>
+    <flag name="screencast">Enable support for remote desktop and screen cast using <pkg>media-video/pipewire</pkg></flag>
+  </use>
+</pkgmetadata>

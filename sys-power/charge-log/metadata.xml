@@ -1,1 +1,11 @@
-../../metadata.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <name>kitsunyan</name>
+    <email>kitsunyan@airmail.cc</email>
+  </maintainer>
+  <use>
+    <flag name="gtk3">Enable support for GTK+3</flag>
+  </use>
+</pkgmetadata>

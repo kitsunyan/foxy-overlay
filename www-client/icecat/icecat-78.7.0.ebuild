@@ -1,4 +1,4 @@
-# Copyright 2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -96,7 +96,7 @@ RDEPEND="${CDEPEND}
 	)"
 
 DEPEND="${CDEPEND}
-	=www-client/icecat-sources-${PV}
+	www-client/icecat-sources:${PV}
 	pulseaudio? (
 		|| (
 			media-sound/pulseaudio
@@ -156,7 +156,7 @@ src_configure() {
 	mc '--with-app-name=icecat'
 	mc '--disable-crashreporter'
 	mc '--disable-updater'
-	
+
 	mc "--prefix=${EPREFIX}/usr"
 	mc "--libdir=${EPREFIX}/usr/$(get_libdir)"
 	mc "CC=${CHOST}-gcc"
@@ -173,7 +173,7 @@ src_configure() {
 	mc '--enable-official-branding'
 	mc '--with-distribution-id=org.gnu'
 	mc '--with-unsigned-addon-scopes=app,system'
-	
+
 	# System libraries
 	mc '--with-system-zlib'
 	mc '--with-system-av1'
@@ -189,7 +189,7 @@ src_configure() {
 	mc '--with-system-webp'
 	mc '--enable-system-ffi'
 	mc '--enable-system-pixman'
-	
+
 	if use jack; then
 		mc '--enable-jack'
 	else
