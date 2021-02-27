@@ -13,7 +13,7 @@ SLOT="${PV}"
 KEYWORDS="amd64 ~arm64 ~x86"
 IUSE=""
 
-GNUZILLA_PV="bb1c105f4416c2973f394680c2d579918a1da77a"
+GNUZILLA_PV="d5df5618fbf6f6ea0c49b6bfdcb098846d2cd777"
 SRC_URI="
 	https://git.savannah.gnu.org/cgit/gnuzilla.git/snapshot/gnuzilla-${GNUZILLA_PV}.tar.gz
 	https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${PV}esr/source/firefox-${PV}esr.source.tar.xz
