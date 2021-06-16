@@ -3,9 +3,9 @@
 
 EAPI=7
 
-FIREFOX_PATCHSET="firefox-78esr-patches-10.tar.xz"
+FIREFOX_PATCHSET="firefox-78esr-patches-14.tar.xz"
 
-LLVM_MAX_SLOT=11
+LLVM_MAX_SLOT=12
 
 PYTHON_COMPAT=( python3_{7,8,9} )
 PYTHON_REQ_USE="ncurses,sqlite,ssl"
@@ -39,16 +39,16 @@ BDEPEND="${PYTHON_DEPS}
 	>=virtual/rust-1.41.0
 	|| (
 		(
+			sys-devel/clang:12
+			sys-devel/llvm:12
+		)
+		(
 			sys-devel/clang:11
 			sys-devel/llvm:11
 		)
 		(
 			sys-devel/clang:10
 			sys-devel/llvm:10
-		)
-		(
-			sys-devel/clang:9
-			sys-devel/llvm:9
 		)
 	)
 	amd64? ( >=dev-lang/yasm-1.1 )
